@@ -1,9 +1,5 @@
 learning_react/15-setting-up-your-react-development-environment/node_modules/
 learning_react/15-setting-up-your-react-development-environment/output/
-angularjs/angular.js
-angularjs/angular-animate.js
-angularjs/ui-bootstrap-tpls-2.5.0.js
-angularjs/node_modules/
 jasmine/lib/
 requirejs/require.js
 requirejs/lib/
@@ -17,7 +13,6 @@ karma-requirejs-angularjs/junit/
 karma-requirejs-angularjs/coverage/Chrome 64.0.3282 (Windows 10.0.0)/app/myService.js.html
 karma-requirejs-angularjs/coverage/
 karma-requirejs-angularjs/lib/
-angularjs/angular-route.js
 angular/angular2-essential-training/media/
 angular/Learning Angular LiveLessons/**/*.js
 *.png
@@ -29,7 +24,6 @@ protractor/target/
 faktor/data/api.json
 faktor/coverage/
 react/bucky/lib/
-angularjs/angular-messages.js
 angular/kudv_angular/25-services/WebApp/src/
 aspnet+angular/.vs/
 angular/commApp/lint-result.json
@@ -40,3 +34,10 @@ css/CSS - The Complete Guide - Max/05-practicing-the-basics/freedom.jpg
 *.csproj.user
 *.suo
 **/.vs/**
+css/CSS - The Complete Guide - Max/06-fixed-navigation-bar/freedom.jpg
+css/CSS - The Complete Guide - Max/06-fixed-navigation-bar/images/plans-background.jpg
+*.jpg
+*.env
+*.htpasswd
+nodejs/9-practica-nodejs/ch01/demo-node-app/public/css/bootstrap.min.css
+.env*
