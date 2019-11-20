@@ -8,7 +8,7 @@
     "test": "test"
   },
   "dependencies": {
-    "angular": "^1.5.11",
+    "angular": "^1.7.9",
     "angular-mocks": "^1.5.11",
     "angular-route": "^1.5.11",
     "jasmine-core": "^2.9.1",
