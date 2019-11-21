@@ -13,5 +13,8 @@
     "clone-deep": "^4.0.1",
     "glob": "^7.1.6",
     "ora": "^4.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.0"
   }
 }
