@@ -1,23 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Canvas Test Animation</title>
-    <script src="tween.umd.js"></script>
+    <script src="lib/tween.umd.js"></script>
+    <script src="utils.js"></script>
     <style>
+        body,
+        html {
+            margin: 0px;
+            background-color: rgb(59, 134, 199);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
         .container {
-            background-color: white;
             display: flex;
-            justify-content: center;
-        };
+            justify-content: flex-end;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            width: 300px;
+        }
+
+        li a {
+            background-color: #f1f1f1;
+            display: block;
+            color: #000;
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            font-size: xx-large;
+            text-align: center;
+            border-radius: 25px;
+        }
+
+        /* Change the link color on hover */
+        li a:hover {
+            background-color: #555;
+            color: white;
+        }
+
+        #myCanvas {
+            position: fixed;
+        }
+
+        .editor-area {
+            position: fixed;
+            bottom: 0px;
+        }
+
+        .input {
+            display: block;
+        }
     </style>
 </head>
+
 <body>
+    <canvas id="myCanvas"></canvas>
     <div class="container">
-        <canvas id="myCanvas" width="800" height="800"></canvas>
+        <div style="padding: 100px; border: 2px solid black">
+            <ul>
+                <li><a href="#" id="spinTheWheel">Spin</a></li>
+                <li><a href="#" id="stopTheWheel">Stop</a></li>
+                <li><a href="#" id="justATest">Test</a></li>
+            </ul>
+        </div>
+        <div class="editor-area">
+            <h4>Slices</h4>
+            <div class="input">
+                <label for="slice-0-color">Slice 0, Color:</label>
+                <input type="color" id="slice-0-color" name="slice-0-color" value="#ff0000">
+                <label for="slice-0-text">Text:</label>
+                <input type="text" id="slice-0-text" name="slice-0-text" value="">
+            </div>
+            <div class="input">
+                <label for="slice-1-color">Slice 1, Color:</label>
+                <input type="color" id="slice-1-color" name="slice-1-color" value="#ff0000">
+                <label for="slice-1-color">Text:</label>
+                <input type="text" id="slice-1-text" name="slice-1-text" value="">
+            </div>
+            <div class="input">
+                <label for="slice-2-color">Slice 2, Color:</label>
+                <input type="color" id="slice-2-color" name="slice-2-color" value="#ff0000">
+                <label for="slice-2-color">Text:</label>
+                <input type="text" id="slice-2-text" name="slice-2-text" value="">
+            </div>
+            <div class="input">
+                <label for="slice-3-color">Slice 3, Color:</label>
+                <input type="color" id="slice-3-color" name="slice-3-color" value="#ff0000">
+                <label for="slice-3-color">Text:</label>
+                <input type="text" id="slice-3-text" name="slice-3-text" value="">
+            </div>
+            <div class="input">
+                <label for="slice-4-color">Slice 4, Color:</label>
+                <input type="color" id="slice-4-color" name="slice-4-color" value="#ff0000">
+                <label for="slice-4-color">Text:</label>
+                <input type="text" id="slice-4-text" name="slice-4-text" value="">
+            </div>
+            <div class="input">
+                <label for="slice-5-color">Slice 5, Color:</label>
+                <input type="color" id="slice-5-color" name="slice-5-color" value="#ff0000">
+                <label for="slice-5-color">Text:</label>
+                <input type="text" id="slice-5-text" name="slice-5-text" value="">
+            </div>
+            <h4>Outer Ring</h4>
+            <div class="input">
+                <label for="outer-ring-color">Color:</label>
+                <input type="color" id="outer-ring-color" name="outer-ring-color" value="#ff0000">
+                <label for="outer-ring-size">Size:</label>
+                <input type="range" id="outer-ring-size" name="outer-ring-size" min="0" max="60">
+            </div>
+        </div>
     </div>
     <script src="index.js"></script>
+    <script src="editor.js"></script>
 </body>
+
 </html>
