@@ -7,35 +7,38 @@ let tween;
 const imageTcsLogo = new Image();
 let animRequestId;
 
+let elapsedTime = 0;
+let dividerAnimPhase = -1;
+const dividerBuldCount = 9;
+
 const wheel = {
+    text: {
+        color: "#afabe7",
+        size: "47",
+        offsetFromCenter: "458",
+    },
     outerRing: {
         color: '#5a349a',
         size: 17,
     },
     slices: [
         {
-            color: "95,104,195",
-            text: "Slice 0"
+            color: "95,104,195", text: "Fabulon"
         },
         {
-            color: "90,100,170",
-            text: "Slice 1"
+            color: "90,100,170", text: "Baba"
         },
         {
-            color: "#4f59b9",
-            text: "Slice 2"
+            color: "#4f59b9", text: "Zewa"
         },
         {
-            color: "#73719d",
-            text: "Slice 3"
+            color: "#73719d", text: "Corona"
         },
         {
-            color: "195,104,195",
-            text: "Slice 4"
+            color: "195,104,195", text: "Joker"
         },
         {
-            color: "#7557cc",
-            text: "Slice 5"
+            color: "#7557cc", text: "Snafu"
         }
     ]
 };
@@ -52,7 +55,8 @@ function loadImages() {
     imageTcsLogo.onload = () => {
         // draw image...
         console.log('image loaded...');
-        draw(false);
+        animRequestId = window.requestAnimationFrame(animate);
+        // draw(false);
     }
 
     imageTcsLogo.src = './assets/tcs-logo.png';
@@ -78,19 +82,16 @@ document
 
         tween = new TWEEN.Tween(obj)
             .to({ speed: 0.0 }, 20000)
-            // .easing(TWEEN.Easing.Cubic.Out);
             .easing(TWEEN.Easing.Quintic.Out);
-        // .interpolation(TWEEN.Interpolation.Bezier);
 
         tween.start();
-        animRequestId = window.requestAnimationFrame(animate);
     });
 
 document
     .querySelector('#stopTheWheel')
     .addEventListener('click', () => {
         rotation = 0;
-        window.cancelAnimationFrame(animRequestId);
+        // window.cancelAnimationFrame(animRequestId);
     });
 
 document
@@ -131,14 +132,29 @@ function init() {
 
 function animate(time) {
 
-    tween.update(time);
+    if (tween) {
+        tween.update(time);
+        rotation += obj.speed;
+    }
 
-    console.log('speed: ', obj.speed);
+    // console.log('speed: ', obj.speed);
 
-    rotation += obj.speed;
 
-    if (obj.speed > 0) {
-        animRequestId = window.requestAnimationFrame(animate);
+    // if (obj.speed > 0) {
+    animRequestId = window.requestAnimationFrame(animate);
+    // }
+
+    elapsedTime += 1;
+
+    if (elapsedTime > 6) {
+
+        dividerAnimPhase++;
+
+        if (dividerAnimPhase > dividerBuldCount) {
+            dividerAnimPhase = -1;
+        }
+
+        elapsedTime = 0;
     }
 
     draw();
@@ -151,70 +167,91 @@ function draw() {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    context.fillStyle = 'rgb(59, 134, 199)';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    let radius = (canvas.height / 2) * 0.95;
-
-    let sliceAngle = (2 * Math.PI) / wheel.slices.length;
-
     let cx = canvas.width / 2;
     let cy = canvas.height / 2;
 
-    context.translate(cx, cy);
-    context.rotate(rotation);
-
-    context.lineWidth = 6;
-
-    context.save();
-
-    context.shadowColor = 'black';
-    context.shadowBlur = 16;
-    context.shadowOffsetX = 0;
-    context.shadowOffsetY = 0;
 
 
-    for (let i = 0; i < wheel.slices.length; ++i) {
-        context.beginPath();
-        context.moveTo(0, 0);
-        context.arc(0, 0, radius, sliceAngle * i, sliceAngle + sliceAngle * i);
-        context.lineTo(0, 0);
-        // context.fillStyle = 'black';
-        // context.font = '48px Arial';
-        // context.fillText('Hello World', 10, 10);
 
-        // const newx = 0;
-        // const newy = 0;
+        context.fillStyle = 'rgb(59, 134, 199)';
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
-        // context.save();
-        // context.translate(newx, newy);
-        // // context.rotate(-Math.PI / 2);
-        // context.rotate(sliceAngle * i);
-        // // context.textAlign = "center";
-        // context.textBaseline = "middle";
-        // context.fillText("Some Text", radius * 0.2, 0);
-        // context.restore();
+        let radius = (canvas.height / 2) * 0.95;
 
-        if (wheel.slices[i].color.startsWith('#')) {
-            context.fillStyle = wheel.slices[i].color;
-        } else {
-            context.fillStyle = 'rgb(' + wheel.slices[i].color + ')';
+        let sliceAngle = (2 * Math.PI) / wheel.slices.length;
+
+
+        context.translate(cx, cy);
+        context.rotate(rotation);
+
+        context.lineWidth = 6;
+
+        context.save();
+
+        // context.shadowColor = 'black';
+        // context.shadowBlur = 16;
+        // context.shadowOffsetX = 0;
+        // context.shadowOffsetY = 0;
+
+
+        for (let i = 0; i < wheel.slices.length; ++i) {
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.arc(0, 0, radius, sliceAngle * i, sliceAngle + sliceAngle * i);
+            context.lineTo(0, 0);
+            // context.fillStyle = 'black';
+            // context.font = '48px Arial';
+            // context.fillText('Hello World', 10, 10);
+
+            // const newx = 0;
+            // const newy = 0;
+
+            // context.save();
+            // context.translate(newx, newy);
+            // // context.rotate(-Math.PI / 2);
+            // context.rotate(sliceAngle * i);
+            // // context.textAlign = "center";
+            // context.textBaseline = "middle";
+            // context.fillText("Some Text", radius * 0.2, 0);
+            // context.restore();
+
+            if (wheel.slices[i].color.startsWith('#')) {
+                context.fillStyle = wheel.slices[i].color;
+            } else {
+                context.fillStyle = 'rgb(' + wheel.slices[i].color + ')';
+            }
+
+            context.fill();
         }
 
+        context.restore();
 
+        // draw dividers
+        context.save();
 
-        context.fill();
-    }
+        context.shadowColor = 'black';
+        context.shadowBlur = 16;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
 
-    context.restore();
+        context.lineWidth = 16;
+        context.strokeStyle = 'yellow';
 
-    context.fillStyle = 'white';
-    context.font = '48px Arial';
+        for (let i = 0; i < wheel.slices.length; ++i) {
 
-    for (let i = 0; i < wheel.slices.length; ++i) {
+            context.setTransform(1, 0, 0, 1, 0, 0);
+            context.translate(cx, cy);
+            context.rotate(rotation);
 
-        const newx = 0;
-        const newy = 0;
+            context.rotate((sliceAngle * i) - sliceAngle * 0.5);
+
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(0, radius);
+            context.stroke();
+        }
+
+        context.restore();
 
         context.save();
 
@@ -223,34 +260,137 @@ function draw() {
         context.shadowOffsetX = 0;
         context.shadowOffsetY = 0;
 
-        context.translate(newx, newy);
-        // context.rotate(-Math.PI / 2);
-        // context.rotate(sliceAngle * i);
-        context.rotate((sliceAngle - sliceAngle / 2.0) + sliceAngle * i);
-        // context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText(wheel.slices[i].text, radius * 0.2, 0);
+        for (let i = 0; i < wheel.slices.length; ++i) {
+
+            context.setTransform(1, 0, 0, 1, 0, 0);
+            context.translate(cx, cy);
+            context.rotate(rotation);
+
+            context.rotate((sliceAngle * i) - sliceAngle * 0.5);
+
+            // draw divider lights
+            for (let j = 0; j < dividerBuldCount; ++j) {
+                context.beginPath();
+                if (j === dividerAnimPhase) {
+                    context.fillStyle = 'orange';
+                } else {
+                    context.fillStyle = 'red';
+                }
+                context.arc(0, 80 + j * 36, 16, 0, Math.PI * 2);
+                context.fill();
+            }
+        }
+
         context.restore();
 
 
-    }
+        context.fillStyle = wheel.text.color;
+        context.font = wheel.text.size + 'px Arial';
 
-    // context.strokeStyle = 'rgb(50, 50, 150)';
+        for (let i = 0; i < wheel.slices.length; ++i) {
 
-    // for (let i = 0; i < slices.length; ++i) {
-    //     context.beginPath();
-    //     context.moveTo(0, 0);
-    //     context.arc(0, 0, radius, sliceAngle * i, sliceAngle + sliceAngle * i);
-    //     context.lineTo(0, 0);
-    //     context.stroke();
-    // }
+            const newx = 0;
+            const newy = 0;
+
+            context.save();
+
+            context.shadowColor = 'black';
+            context.shadowBlur = 10;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+
+            context.translate(newx, newy);
+            context.rotate((sliceAngle - sliceAngle / 2.0) + sliceAngle * i);
+            context.textBaseline = "middle";
+            context.fillText(wheel.slices[i].text, radius * wheel.text.offsetFromCenter * 0.001, 0);
+
+            context.restore();
+        }
+
+        // context.strokeStyle = 'rgb(50, 50, 150)';
+
+        // for (let i = 0; i < slices.length; ++i) {
+        //     context.beginPath();
+        //     context.moveTo(0, 0);
+        //     context.arc(0, 0, radius, sliceAngle * i, sliceAngle + sliceAngle * i);
+        //     context.lineTo(0, 0);
+        //     context.stroke();
+        // }
+
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.translate(cx, cy);
+
+        const wh = radius * 0.25;
+
+        context.save();
+
+        context.shadowColor = 'black';
+        context.shadowBlur = 10;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+
+
+        context.fillStyle = 'rgb(50, 50, 150)';
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.arc(0, 0, radius * 0.12, 0, Math.PI * 2);
+        context.fill();
+
+
+
+
+
+
+
+        context.restore();
+
+
+        context.save();
+
+        context.fillStyle = 'rgb(150, 50, 150)';
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.arc(0, 0, radius * 0.1, 0, Math.PI * 2);
+        context.fill();
+
+        context.drawImage(imageTcsLogo, -wh / 2, -wh / 2, wh, wh);
+
+        context.restore();
+
+
+
+        context.save();
+
+        context.shadowColor = 'black';
+        context.shadowBlur = 10;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+
+        context.strokeStyle = wheel.outerRing.color;
+        context.lineWidth = wheel.outerRing.size;
+        context.beginPath();
+        context.arc(0, 0, radius, 0, -Math.PI * 2);
+        context.stroke();
+
+        context.restore();
+
+
+
+    context.save();
+
+
+
+
 
     context.setTransform(1, 0, 0, 1, 0, 0);
-    context.translate(cx, cy);
+    context.translate(cx + radius * 0.85, cy);
 
-    const wh = radius * 0.25;
+    context.beginPath();
+    context.moveTo(0, 0);
+    context.lineTo(70, 30);
+    context.lineTo(70, -30);
+    context.closePath();
 
-    context.save();
 
     context.shadowColor = 'black';
     context.shadowBlur = 10;
@@ -258,50 +398,16 @@ function draw() {
     context.shadowOffsetY = 0;
 
 
-    context.fillStyle = 'rgb(50, 50, 150)';
-    context.beginPath();
-    context.moveTo(0, 0);
-    context.arc(0, 0, radius * 0.12, 0, Math.PI * 2);
-    context.fill();
-
-
-
-
-
-
-
-    context.restore();
-
-
-    context.save();
-
-    context.fillStyle = 'rgb(150, 50, 150)';
-    context.beginPath();
-    context.moveTo(0, 0);
-    context.arc(0, 0, radius * 0.1, 0, Math.PI * 2);
-    context.fill();
-
-    context.drawImage(imageTcsLogo, -wh / 2, -wh / 2, wh, wh);
-
-    context.restore();
-
-
-
-    context.save();
-
-    context.shadowColor = 'black';
-    context.shadowBlur = 10;
-    context.shadowOffsetX = 0;
-    context.shadowOffsetY = 0;
-
-
-    context.strokeStyle = wheel.outerRing.color;
-    context.lineWidth = wheel.outerRing.size;
-    context.beginPath();
-    // context.moveTo(0, 0);
-    // context.lineTo(200, 100);
-    context.arc(0, 0, radius, 0, -Math.PI * 2);
+    // the outline
+    context.lineWidth = 10;
+    context.strokeStyle = "#FFCC00";
     context.stroke();
+
+    context.shadowColor = "transparent";
+
+    // the fill color
+    context.fillStyle = '#666666';
+    context.fill();
 
     context.restore();
 

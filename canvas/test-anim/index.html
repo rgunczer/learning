@@ -52,7 +52,7 @@
 
         .editor-area {
             position: fixed;
-            bottom: 0px;
+            left: 0px;
         }
 
         .input {
@@ -64,7 +64,8 @@
 <body>
     <canvas id="myCanvas"></canvas>
     <div class="container">
-        <div style="padding: 100px; border: 2px solid black">
+        <!-- <div style="padding: 100px; border: 2px solid black"> -->
+        <div style="padding: 100px">
             <ul>
                 <li><a href="#" id="spinTheWheel">Spin</a></li>
                 <li><a href="#" id="stopTheWheel">Stop</a></li>
@@ -72,6 +73,11 @@
             </ul>
         </div>
         <div class="editor-area">
+            <h4>Wheel</h4>
+            <div class="input">
+                <label for="winner-slice-color">Selected Slice Flash Color:</label>
+                <input type="color" id="selected-slice-flash-color" name="selected-slice-flash-color" value="#ff0000">
+            </div>
             <h4>Slices</h4>
             <div class="input">
                 <label for="slice-0-color">Slice 0, Color:</label>
@@ -109,12 +115,37 @@
                 <label for="slice-5-color">Text:</label>
                 <input type="text" id="slice-5-text" name="slice-5-text" value="">
             </div>
+            <h4>Center</h4>
+            <div class="input">
+                <label for="center-color">Color:</label>
+                <input type="color" id="center-color" name="center-color" value="#ff0000">
+                <label for="center-size">Size:</label>
+                <input type="range" id="center-size" name="center-size" min="0" max="60">
+            </div>
+            <h4>Inner Ring</h4>
+            <div class="input">
+                <label for="inner-ring-color">Color:</label>
+                <input type="color" id="inner-ring-color" name="inner-ring-color" value="#ff0000">
+                <label for="inner-ring-size">Size:</label>
+                <input type="range" id="inner-ring-size" name="inner-ring-size" min="0" max="60">
+            </div>
             <h4>Outer Ring</h4>
             <div class="input">
                 <label for="outer-ring-color">Color:</label>
                 <input type="color" id="outer-ring-color" name="outer-ring-color" value="#ff0000">
                 <label for="outer-ring-size">Size:</label>
                 <input type="range" id="outer-ring-size" name="outer-ring-size" min="0" max="60">
+            </div>
+            <h4>Text</h4>
+            <div class="input">
+                <label for="text-color">Color:</label>
+                <input type="color" id="text-color" name="text-color" value="#ff0000">
+                <label for="text-size">Size:</label>
+                <input type="range" id="text-size" name="text-size" min="0" max="160">
+            </div>
+            <div class="input">
+                <label for="text-offset">Offset:</label>
+                <input type="range" id="text-offset" name="text-offset" min="60" max="600">
             </div>
         </div>
     </div>

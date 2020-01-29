@@ -64,4 +64,45 @@
 
         draw();
     });
+
+
+    const elemTextColor = document.querySelector('#text-color');
+
+    elemTextColor.value = wheel.text.color;
+
+    elemTextColor.addEventListener('change', (event) => {
+
+        console.log('text color changed', event.target.value);
+
+        wheel.text.color = elemTextColor.value;
+
+        draw();
+    });
+
+    const elemTextSize = document.querySelector('#text-size');
+
+    elemTextSize.value = wheel.text.size;
+
+    elemTextSize.addEventListener('change', (event) => {
+
+        console.log('text size changed', event.target.value);
+
+        wheel.text.size = elemTextSize.value;
+
+        draw();
+    });
+
+    const elemTextOffset = document.querySelector('#text-offset');
+
+    elemTextOffset.value = wheel.text.offsetFromCenter;
+
+    elemTextOffset.addEventListener('change', (event) => {
+
+        console.log('text offset changed', event.target.value);
+
+        wheel.text.offsetFromCenter = elemTextOffset.value;
+
+        draw();
+    });
+
 })();
