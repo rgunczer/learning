@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Canvas Test Animation</title>
     <script src="lib/tween.umd.js"></script>
+    <script src="lib/matter.js" type="text/javascript"></script>
     <script src="utils.js"></script>
     <style>
         body,
@@ -19,6 +20,12 @@
         .container {
             display: flex;
             justify-content: flex-end;
+        }
+
+        .container-matter {
+            display: flex;
+            /* justify-content: flex-start; */
+            justify-content: center;
         }
 
         ul {
@@ -62,9 +69,16 @@
 </head>
 
 <body>
+    <div class="container-matter">
+        <!-- <canvas id="myCanvas"></canvas> -->
+    </div>
+    <button style="position: fixed; top:0;" type="button" id="test">Test</button>
+
+
+    <!--
     <canvas id="myCanvas"></canvas>
     <div class="container">
-        <!-- <div style="padding: 100px; border: 2px solid black"> -->
+
         <div style="padding: 100px">
             <ul>
                 <li><a href="#" id="spinTheWheel">Spin</a></li>
@@ -72,7 +86,7 @@
                 <li><a href="#" id="justATest">Test</a></li>
             </ul>
         </div>
-        <div class="editor-area">
+        <div class="editor-area" style="display: none;">
             <h4>Wheel</h4>
             <div class="input">
                 <label for="winner-slice-color">Selected Slice Flash Color:</label>
@@ -149,8 +163,9 @@
             </div>
         </div>
     </div>
+-->
     <script src="index.js"></script>
-    <script src="editor.js"></script>
+    <!-- <script src="editor.js"></script> -->
 </body>
 
 </html>
