@@ -12,54 +12,87 @@ const Bodies = Matter.Bodies;
 const Body = Matter.Body;
 
 let engine = null;
-// let render = null;
-let tongue = null;
+let tongueBody = null;
 let wheelBody = null;
+let spinning = false;
+let drawPhysics = false;
 
-let elapsed = 0;
+const drawFlags = {
+    slices: true,
+    dividers: true,
+    texts: true,
+    innerRing: true,
+    center: true,
+    outerRing: true,
+    tongue: true,
+    collisionCircles: false,
+};
 
+const flasher = {
+    index: -1,
+    counter: 0,
+    fill: true,
 
-let renderMatter = false;
+    setup(index = -1) {
+        this.index = index;
+        this.counter = 0
+        this.next = this.cooldown - this.nextStep;
+    },
 
-let rotation = 0;
-let obj = {};
-let tween;
+    update(fillStyle) {
+        this.counter++;
+
+        if (this.counter > wheelData.flashing.time) {
+            this.setup();
+            return fillStyle
+        } else {
+            if (this.counter % 9 === 0) {
+                this.fill = !this.fill;
+            }
+            if (this.fill) {
+                return wheelData.flashing.color
+            } else {
+                return fillStyle;
+            }
+        }
+    }
+};
+
 const imageTcsLogo = new Image();
-let animRequestId;
 
-let elapsedTime = 0;
-let dividerAnimPhase = -1;
-const dividerBuldCount = 9;
-
-const wheel = {
+const wheelData = {
+    flashing: {
+        color: '#ffff00',
+        time: 1234,
+    },
+    dividers: {
+        color: '#8166ce',
+        size: "20"
+    },
     text: {
         color: "#afabe7",
         size: "47",
         offsetFromCenter: "458",
+    },
+    center: {
+        color: '#0000ff',
+        size: "10"
+    },
+    innerRing: {
+        color: '#7054b8',
+        size: "13",
     },
     outerRing: {
         color: '#5a349a',
         size: 17,
     },
     slices: [
-        {
-            color: "95,104,195", text: "Fabulon"
-        },
-        {
-            color: "90,100,170", text: "Baba"
-        },
-        {
-            color: "#4f59b9", text: "Zewa"
-        },
-        {
-            color: "#73719d", text: "Corona"
-        },
-        {
-            color: "195,104,195", text: "Joker"
-        },
-        {
-            color: "#7557cc", text: "Snafu"
-        }
+        { "color": "#918bc5", "text": "Sekiro" },
+        { "color": "#a06bd1", "text": "Nioh" },
+        { "color": "#4f59b9", "text": "RDR2" },
+        { "color": "#73719d", "text": "FarCry" },
+        { "color": "#6872b0", "text": "Doom" },
+        { "color": "#7557cc", "text": "Yakuza" }
     ]
 };
 
@@ -73,363 +106,202 @@ function setCanvasSize() {
 function loadImages() {
 
     imageTcsLogo.onload = () => {
-        // draw image...
-        console.log('image loaded...');
+        console.log('images loaded...');
+        initPhysics();
         animRequestId = window.requestAnimationFrame(animate);
-        // draw(false);
-        initMatter();
     }
 
     imageTcsLogo.src = './assets/tcs-logo.png';
 }
 
-
-window
-    .addEventListener('resize', () => {
-        if (canvas) {
-            setCanvasSize();
-            draw(false);
-        }
-    }, false);
-
-document
-    .querySelector('#spinTheWheel')
-    .addEventListener('click', () => {
-        console.log('spin');
-
-        Body.setAngularVelocity(wheelBody, Math.PI / 12);
-
-        obj = {
-            speed: 0.2
-        }
-
-        tween = new TWEEN.Tween(obj)
-            .to({ speed: 0.0 }, 20000)
-            .easing(TWEEN.Easing.Quintic.Out);
-
-        tween.start();
-    });
-
-document
-    .querySelector('#stopTheWheel')
-    .addEventListener('click', () => {
-        rotation = 0;
-        // window.cancelAnimationFrame(animRequestId);
-    });
-
-document
-    .querySelector('#justATest')
-    .addEventListener('click', () => {
-
-        const x = 0;
-        const y = 0;
-        const width = canvas.width;
-        const height = canvas.height;
-
-        var imgd = context.getImageData(x, y, width, height);
-        var pix = imgd.data;
-
-        // Loop over each pixel and invert the color.
-        for (var i = 0, n = pix.length; i < n; i += 4) {
-            pix[i] = 255 - pix[i]; // red
-            pix[i + 1] = 255 - pix[i + 1]; // green
-            pix[i + 2] = 255 - pix[i + 2]; // blue
-            // i+3 is alpha (the fourth element)
-        }
-
-        // Draw the ImageData at the given (x,y) coordinates.
-        context.putImageData(imgd, x, y);
-    });
-
-
-    document
-    .querySelector('#renderMatter')
-    .addEventListener('click', () => {
-        renderMatter = !renderMatter;
-    });
-
-function init() {
-    console.log('init')
-    canvas = document.querySelector('#myCanvas');
-    context = canvas.getContext("2d");
-
+window.addEventListener('resize', () => {
     setCanvasSize();
-    loadImages();
+    draw();
+}, false);
+
+document.querySelector('#spinTheWheel').addEventListener('click', () => {
+    console.log('spin');
+    spinning = true;
+    flasher.setup();
+
+    const velocity = Math.PI / getRandom(9, 16);
+
+    Body.setAngularVelocity(wheelBody, velocity);
+});
+
+document.querySelector('#stopTheWheel').addEventListener('click', () => {
+    console.log('stop');
+    spinning = false;
+    flasher.setup();
+    Body.setAngularVelocity(wheelBody, 0);
+
+});
+
+document.querySelector('#renderMatter').addEventListener('click', () => {
+    drawPhysics = !drawPhysics;
+});
+
+(function init() {
+
+    setTimeout(() => {
+        console.log('init')
+        canvas = document.querySelector('#myCanvas');
+        context = canvas.getContext("2d");
+
+        setCanvasSize();
+        loadImages();
+    });
+
+})();
+
+function animate() {
+    Engine.update(engine);
+    checkSelectedSliceAfterSpinning();
+    draw();
+    window.requestAnimationFrame(animate);
 }
 
-function animate(time) {
+function drawTask(taskFn) {
+    context.save();
+    taskFn();
+    context.restore();
+}
 
-    if (engine) {
-        // console.log('matter update with: ', time);
-        Engine.update(engine); //, elapsed)
-    }
+function drawSlices() {
+    let radius = (canvas.height / 2) * 0.95;
+    let sliceDegree = 360.0 / wheelData.slices.length;
 
-    if (tween) {
-        tween.update(time);
-        rotation += obj.speed;
-    }
+    context.translate(wheelBody.position.x, wheelBody.position.y);
+    context.rotate(wheelBody.angle);
 
-    // console.log('speed: ', obj.speed);
+    for (let i = 0; i < wheelData.slices.length; ++i) {
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.arc(0, 0, radius, deg2rad(sliceDegree * i), deg2rad(sliceDegree + sliceDegree * i));
+        context.lineTo(0, 0);
+        context.fillStyle = wheelData.slices[i].color;
 
-
-    // if (obj.speed > 0) {
-    animRequestId = window.requestAnimationFrame(animate);
-    // }
-
-    elapsedTime += 1;
-
-    if (elapsedTime > 6) {
-
-        dividerAnimPhase++;
-
-        if (dividerAnimPhase > dividerBuldCount) {
-            dividerAnimPhase = -1;
+        if (flasher.index === i) {
+            context.fillStyle = flasher.update(context.fillStyle);
         }
 
-        elapsedTime = 0;
+        context.fill();
     }
-
-    draw();
 }
 
-function draw() {
-    // console.log('draw');
-
-
-    context.setTransform(1, 0, 0, 1, 0, 0);
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
+function drawDividers() {
     let cx = canvas.width / 2;
     let cy = canvas.height / 2;
+    let sliceDegree = 360.0 / wheelData.slices.length;
+    let sliceAngle = deg2rad(sliceDegree);
+    let radius = (canvas.height / 2) * 0.95;
 
-    if (renderMatter) {
-        Render.world(render);
-    }
+    context.shadowColor = 'black';
+    context.shadowBlur = 16;
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
 
-    // return;
+    context.lineWidth = wheelData.dividers.size;
+    context.strokeStyle = wheelData.dividers.color;
 
-/*
-
-        context.fillStyle = 'red'; // 'rgb(59, 134, 199)';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-*/
-        let radius = (canvas.height / 2) * 0.95;
-
-        let sliceAngle = (2 * Math.PI) / wheel.slices.length;
-/*
-
-        context.translate(cx, cy);
-        context.rotate(rotation);
-
-        context.lineWidth = 6;
-*/
-        context.save();
-
-        context.translate(wheelBody.position.x, wheelBody.position.y);
-        context.rotate(wheelBody.angle);
-
-        // context.shadowColor = 'black';
-        // context.shadowBlur = 16;
-        // context.shadowOffsetX = 0;
-        // context.shadowOffsetY = 0;
-
-        for (let i = 0; i < wheel.slices.length; ++i) {
-            context.beginPath();
-            context.moveTo(0, 0);
-            context.arc(0, 0, radius, sliceAngle * i, sliceAngle + sliceAngle * i);
-            context.lineTo(0, 0);
-            // context.fillStyle = 'black';
-            // context.font = '48px Arial';
-            // context.fillText('Hello World', 10, 10);
-
-            // const newx = 0;
-            // const newy = 0;
-
-            // context.save();
-            // context.translate(newx, newy);
-            // // context.rotate(-Math.PI / 2);
-            // context.rotate(sliceAngle * i);
-            // // context.textAlign = "center";
-            // context.textBaseline = "middle";
-            // context.fillText("Some Text", radius * 0.2, 0);
-            // context.restore();
-
-            if (wheel.slices[i].color.startsWith('#')) {
-                context.fillStyle = wheel.slices[i].color;
-            } else {
-                context.fillStyle = 'rgb(' + wheel.slices[i].color + ')';
-            }
-
-            context.fill();
-        }
-
-        context.restore();
-
-        // draw dividers
-        context.save();
-
-        context.shadowColor = 'black';
-        context.shadowBlur = 16;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
-
-        context.lineWidth = 16;
-        context.strokeStyle = 'yellow';
-
-        for (let i = 0; i < wheel.slices.length; ++i) {
-
-            context.setTransform(1, 0, 0, 1, 0, 0);
-            context.translate(cx, cy);
-            context.rotate(wheelBody.angle);
-
-            context.rotate((sliceAngle * i) - sliceAngle * 0.5);
-
-            context.beginPath();
-            context.moveTo(0, 0);
-            context.lineTo(0, radius);
-            context.stroke();
-        }
-
-        context.restore();
-/*
-        context.save();
-
-        context.shadowColor = 'black';
-        context.shadowBlur = 10;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
-
-        for (let i = 0; i < wheel.slices.length; ++i) {
-
-            context.setTransform(1, 0, 0, 1, 0, 0);
-            context.translate(cx, cy);
-            context.rotate(rotation);
-
-            context.rotate((sliceAngle * i) - sliceAngle * 0.5);
-
-            // draw divider lights
-            for (let j = 0; j < dividerBuldCount; ++j) {
-                context.beginPath();
-                if (j === dividerAnimPhase) {
-                    context.fillStyle = 'orange';
-                } else {
-                    context.fillStyle = 'red';
-                }
-                context.arc(0, 80 + j * 36, 16, 0, Math.PI * 2);
-                context.fill();
-            }
-        }
-
-        context.restore();
-*/
-
-        context.fillStyle = wheel.text.color;
-        context.font = wheel.text.size + 'px Arial';
-
-        for (let i = 0; i < wheel.slices.length; ++i) {
-
-            const newx = wheelBody.position.x;
-            const newy = wheelBody.position.y;
-
-            context.save();
-
-            context.shadowColor = 'black';
-            context.shadowBlur = 10;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-
-            context.translate(newx, newy);
-            context.rotate(wheelBody.angle);
-            context.rotate((sliceAngle - sliceAngle / 2.0) + sliceAngle * i);
-            context.textBaseline = "middle";
-            context.fillText(wheel.slices[i].text, radius * wheel.text.offsetFromCenter * 0.001, 0);
-
-            context.restore();
-        }
-/*
-        // context.strokeStyle = 'rgb(50, 50, 150)';
-
-        // for (let i = 0; i < slices.length; ++i) {
-        //     context.beginPath();
-        //     context.moveTo(0, 0);
-        //     context.arc(0, 0, radius, sliceAngle * i, sliceAngle + sliceAngle * i);
-        //     context.lineTo(0, 0);
-        //     context.stroke();
-        // }
-
+    for (let i = 0; i < wheelData.slices.length; ++i) {
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.translate(cx, cy);
-*/
-        const wh = radius * 0.25;
+        context.rotate(wheelBody.angle);
+        context.rotate((sliceAngle * i) - sliceAngle * 0.5);
 
-        context.save();
-
-        context.shadowColor = 'black';
-        context.shadowBlur = 10;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
-
-
-        context.fillStyle = 'rgb(50, 50, 150)';
         context.beginPath();
-
-        context.moveTo(wheelBody.position.x, wheelBody.position.y);
-        context.arc(wheelBody.position.x, wheelBody.position.y, radius * 0.12, 0, Math.PI * 2);
-        context.fill();
-
-
-        context.restore();
-
-
-        context.save();
-
-        context.fillStyle = 'rgb(150, 50, 150)';
-        context.beginPath();
-        context.moveTo(wheelBody.position.x, wheelBody.position.y);
-        context.arc(wheelBody.position.x, wheelBody.position.y, radius * 0.1, 0, Math.PI * 2);
-        context.fill();
-
-        context.drawImage(imageTcsLogo, wheelBody.position.x - (wh / 2), wheelBody.position.y - (wh / 2), wh, wh);
-
-        context.restore();
-
-
-        // outer ring
-
-        context.save();
-
-        context.shadowColor = 'black';
-        context.shadowBlur = 10;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
-
-        context.strokeStyle = wheel.outerRing.color;
-        context.lineWidth = wheel.outerRing.size;
-        context.beginPath();
-        context.arc(wheelBody.position.x, wheelBody.position.y, radius, 0, -Math.PI * 2);
+        context.moveTo(0, 0);
+        context.lineTo(0, radius);
         context.stroke();
+    }
+}
+
+function drawOuterRing() {
+    const radius = (canvas.height / 2) * 0.95;
+
+    context.shadowColor = 'black';
+    context.shadowBlur = 10;
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
+
+    context.strokeStyle = wheelData.outerRing.color;
+    context.lineWidth = wheelData.outerRing.size;
+    context.beginPath();
+    context.arc(wheelBody.position.x, wheelBody.position.y, radius, 0, -Math.PI * 2);
+    context.stroke();
+}
+
+function drawInnerRing() {
+    const radius = (canvas.height / 2) * 0.95;
+
+    context.shadowColor = 'black';
+    context.shadowBlur = 10;
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
+
+    context.fillStyle = wheelData.innerRing.color;
+    context.beginPath();
+
+    context.moveTo(wheelBody.position.x, wheelBody.position.y);
+    context.arc(wheelBody.position.x, wheelBody.position.y, radius * parseInt(wheelData.innerRing.size) * 0.01, 0, Math.PI * 2);
+    context.fill();
+}
+
+function drawCenter() {
+    const radius = (canvas.height / 2) * 0.95;
+    const wh = radius * 0.25;
+
+    context.fillStyle = wheelData.center.color;
+    context.beginPath();
+    context.moveTo(wheelBody.position.x, wheelBody.position.y);
+    context.arc(wheelBody.position.x, wheelBody.position.y, radius * parseInt(wheelData.center.size) * 0.01, 0, Math.PI * 2);
+    context.fill();
+
+    context.drawImage(imageTcsLogo, wheelBody.position.x - (wh / 2), wheelBody.position.y - (wh / 2), wh, wh);
+}
+
+function drawText() {
+    const radius = (canvas.height / 2) * 0.95;
+    let sliceDegree = 360.0 / wheelData.slices.length;
+    let sliceAngle = deg2rad(sliceDegree);
+
+    context.fillStyle = wheelData.text.color;
+    context.font = wheelData.text.size + 'px Arial';
+
+    for (let i = 0; i < wheelData.slices.length; ++i) {
+        const newx = wheelBody.position.x;
+        const newy = wheelBody.position.y;
+
+        context.save();
+
+        context.shadowColor = 'black';
+        context.shadowBlur = 10;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+
+        context.translate(newx, newy);
+        context.rotate(wheelBody.angle);
+        context.rotate((sliceAngle - sliceAngle / 2.0) + sliceAngle * i);
+        context.textBaseline = "middle";
+        context.fillText(wheelData.slices[i].text, radius * wheelData.text.offsetFromCenter * 0.001, 0);
 
         context.restore();
+    }
+}
 
-
-
-    context.save();
-
+function drawTongue() {
     context.setTransform(1, 0, 0, 1, 0, 0);
-    // context.translate(cx + radius * 1.15, cy);
 
-    // context.rotate(rotation); // * Math.PI / 180 );
-    if (tongue) {
-        console.log('tongue rotation: ', tongue.angle);
-        context.translate(tongue.position.x* 1.07, tongue.position.y);
-        context.rotate(tongue.angle); // * Math.PI / 180);
+    if (tongueBody) {
+        context.translate(tongueBody.position.x * 1.07, tongueBody.position.y);
+        context.rotate(tongueBody.angle);
     }
     context.beginPath();
-    context.moveTo(0, 0);
-    context.lineTo(0, -30);
+    context.moveTo(-10, 0);
+    context.lineTo(0, -40);
     context.lineTo(-90, 0);
-    context.lineTo(0, 30);
+    context.lineTo(0, 40);
     // context.lineTo(0, -30);
     context.closePath();
 
@@ -440,7 +312,8 @@ function draw() {
 
     // the outline
     context.lineWidth = 10;
-    context.strokeStyle = 'rgba(0, 0, 200, 0.4)'; // 'lightblue';
+    // context.strokeStyle = 'rgba(0, 0, 200, 0.4)'; // 'lightblue';
+    context.strokeStyle = 'lightblue';
     context.stroke();
 
     context.shadowColor = "transparent";
@@ -448,42 +321,100 @@ function draw() {
     // the fill color
     context.fillStyle = 'rgba(222,222,222, 0.4)';
     context.fill();
-
-    context.restore();
-
-
 }
 
-init();
+function drawDebugCollisionCircles() {
+    let radius = (canvas.height / 2) * 0.95;
+    const arr = [];
 
+    for (let i = 0; i < wheelData.slices.length; ++i) {
 
-function initMatter() {
+        const newPos = rotatePointCenter(radius, 0, rad2deg(wheelBody.angle) + 30 + i * 60);
 
+        arr.push(newPos);
+
+        newPos.x += wheelBody.position.x;
+        newPos.y += wheelBody.position.y;
+
+        context.beginPath();
+        context.arc(newPos.x, newPos.y, 170, 0, 2 * Math.PI);
+        context.stroke();
+    }
+
+    context.beginPath();
+    context.arc(wheelBody.position.x + radius * 0.9, wheelBody.position.y, 10, 0, 2 * Math.PI);
+    context.stroke();
+}
+
+function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (drawPhysics) {
+        context.globalAlpha = 0.6;
+        Render.world(render);
+    } else {
+        context.globalAlpha = 1;
+    }
+
+    drawFlags.slices && drawTask(drawSlices);
+    drawFlags.dividers && drawTask(drawDividers);
+    drawFlags.texts && drawTask(drawText);
+    drawFlags.innerRing && drawTask(drawInnerRing);
+    drawFlags.center && drawTask(drawCenter);
+    drawFlags.outerRing && drawTask(drawOuterRing);
+    drawFlags.tongue && drawTask(drawTongue);
+    drawFlags.collisionCircles && drawTask(drawDebugCollisionCircles);
+}
+
+function calcCollisionCircles() {
+    let radius = (canvas.height / 2) * 0.95;
+    const arr = [];
+
+    for (let i = 0; i < wheelData.slices.length; ++i) {
+        const newPos = rotatePointCenter(radius, 0, rad2deg(wheelBody.angle) + 30 + i * 60);
+
+        arr.push(newPos);
+
+        newPos.x += wheelBody.position.x;
+        newPos.y += wheelBody.position.y;
+    }
+
+    return arr;
+}
+
+function checkSelectedSliceAfterSpinning() {
+    if (spinning && wheelBody.angularSpeed < 0.001 && tongueBody.angularSpeed < 0.001) {
+        const radius = (canvas.height / 2) * 0.95;
+        const arr = calcCollisionCircles();
+
+        for (let i = 0; i < arr.length; ++i) {
+            const tip = {
+                x: wheelBody.position.x + radius,
+                y: wheelBody.position.y
+            }
+
+            const inside = pointInCircle(tip.x, tip.y, arr[i].x, arr[i].y, 170);
+
+            if (inside) {
+                console.log('inside [' + wheelData.slices[i].text + ']');
+                spinning = false;
+                flasher.setup(i);
+            }
+        }
+    }
+}
+
+function initPhysics() {
     const cw = canvas.width;
     const ch = canvas.height;
 
-    // if (render) {
-    //     Render.stop(render);
-        // World.clear(Engine.world);
-
-
-        if (engine) {
-            Engine.clear(engine);
-            engine = null;
-        }
-
-    //     render.canvas.remove();
-    //     render.canvas = null;
-    //     render.context = null;
-    //     render.textures = {};
-
-    //     render = null;
-    // }
+    if (engine) {
+        Engine.clear(engine);
+        engine = null;
+    }
 
     engine = Engine.create();
-
     render = Render.create({
-        // element: document.querySelector('.container-matter'),
         canvas: canvas,
         engine: engine,
         options: {
@@ -497,64 +428,57 @@ function initMatter() {
         }
     });
 
-    tongue = Bodies.rectangle(cw * 0.9, ch / 2, ch * 0.17, ch * 0.02);
+    tongueBody = Bodies.rectangle(cw * 0.9, ch / 2, ch * 0.17, ch * 0.02);
 
     let x = cw / 2;
     let y = ch / 2;
     let size = ch * 0.8;
     let heig = size * 0.06;
 
-    var partA = Bodies.rectangle(x, y, size, heig);
-    var partB = Bodies.rectangle(x, y, size, heig);
-    var partC = Bodies.rectangle(x, y, size, heig);
+    const divider1 = Bodies.rectangle(x, y, size, heig);
+    const divider2 = Bodies.rectangle(x, y, size, heig);
+    const divider3 = Bodies.rectangle(x, y, size, heig);
 
     let degrees = 0;
+    Body.setAngle(divider1, deg2rad(degrees));
 
-    Body.setAngle(partA, degrees / 180 * Math.PI);
+    degrees += 60;
+    Body.setAngle(divider2, deg2rad(degrees));
 
-    degrees += 60
-    Body.setAngle(partB, degrees / 180 * Math.PI);
-
-    degrees += 60
-    Body.setAngle(partC, degrees / 180 * Math.PI);
+    degrees += 60;
+    Body.setAngle(divider3, deg2rad(degrees));
 
     wheelBody = Body.create({
-        parts: [partA, partB, partC]
+        parts: [divider1, divider2, divider3],
+        friction: 1
     });
 
-    var constrainWheel = Constraint.create({
+    const constraintWheel = Constraint.create({
         pointA: { x: cw / 2, y: ch / 2 },
         bodyB: wheelBody,
         length: 0
     })
 
-    var constraintTongue = Constraint.create({
+    const constraintTongue = Constraint.create({
         pointA: { x: cw * 0.9, y: ch * 0.5 },
-        bodyB: tongue,
+        bodyB: tongueBody,
         pointB: { x: 30, y: 0 },
         length: 0,
     });
 
-    var constraintSpring = Constraint.create({
+    const constraintSpring = Constraint.create({
         pointA: { x: cw, y: ch * 0.5 },
-        bodyB: tongue,
+        bodyB: tongueBody,
         pointB: { x: 50, y: 0 },
-        stiffness: 0.2,
+        stiffness: 0.1,
         length: 20
     })
 
     World.add(engine.world, [
-        tongue,
+        tongueBody,
         wheelBody,
         constraintTongue,
         constraintSpring,
-        constrainWheel
+        constraintWheel,
     ]);
-
-    // Engine.run(engine);
-    // Render.run(render);
-
-    // document.querySelector('#test').addEventListener('click', () => {
-    //     Body.setAngularVelocity(wheelBody, Math.PI / 12);
-    // })
 }

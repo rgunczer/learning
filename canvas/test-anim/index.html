@@ -88,8 +88,17 @@
         <div class="editor-area" style="display: block;">
             <h4>Wheel</h4>
             <div class="input">
-                <label for="winner-slice-color">Selected Slice Flash Color:</label>
+                <label for="selected-slice-flash-color">Selected Slice Flash Color:</label>
                 <input type="color" id="selected-slice-flash-color" name="selected-slice-flash-color" value="#ff0000">
+                <label for="selected-slice-flash-time">Flashing Time:</label>
+                <input type="range" id="selected-slice-flash-time" name="selected-slice-flash-time" min="100" max="600">
+            </div>
+            <h4>Dividers</h4>
+            <div class="input">
+                <label for="dividers-color">Color:</label>
+                <input type="color" id="dividers-color" name="dividers-color" value="#ff0000">
+                <label for="dividers-size">Size:</label>
+                <input type="range" id="dividers-size" name="dividers-size" min="0" max="100">
             </div>
             <h4>Slices</h4>
             <div class="input">
@@ -160,10 +169,36 @@
                 <label for="text-offset">Offset:</label>
                 <input type="range" id="text-offset" name="text-offset" min="60" max="600">
             </div>
+            <h4>Draw Flags</h4>
+            <div class="input">
+                <label for="draw-slices">Draw Slices:</label>
+                <input type="checkbox" id="draw-slices" name="draw-slices" >
+                &nbsp;
+                <label for="draw-dividers">Draw Dividers:</label>
+                <input type="checkbox" id="draw-dividers" name="draw-dividers" >
+                &nbsp;
+                <label for="draw-texts">Draw Texts:</label>
+                <input type="checkbox" id="draw-texts" name="draw-texts" >
+                &nbsp;
+                <label for="draw-inner-ring">Inner Ring:</label>
+                <input type="checkbox" id="draw-inner-ring" name="draw-inner-ring" >
+            </div>
+            <div class="input">
+                <label for="draw-center">Center:</label>
+                <input type="checkbox" id="draw-center" name="draw-center" >
+                &nbsp;
+                <label for="draw-outer-ring">Outer Ring:</label>
+                <input type="checkbox" id="draw-outer-ring" name="draw-outer-ring" >
+                &nbsp;
+                <label for="draw-tongue">Tongue:</label>
+                <input type="checkbox" id="draw-tongue" name="draw-tongue" >
+                &nbsp;
+                <label for="draw-collision-circles">Collision Circles:</label>
+                <input type="checkbox" id="draw-collision-circles" name="draw-collision-circles" >
+            </div>
         </div>
     </div>
 
-    <!-- <script src="index.js"></script> -->
     <script src="fortune-wheel.js"></script>
     <script src="editor.js"></script>
 </body>
