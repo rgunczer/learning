@@ -322,15 +322,15 @@ function draw() {
         }
 
         context.restore();
-
+*/
 
         context.fillStyle = wheel.text.color;
         context.font = wheel.text.size + 'px Arial';
 
         for (let i = 0; i < wheel.slices.length; ++i) {
 
-            const newx = 0;
-            const newy = 0;
+            const newx = wheelBody.position.x;
+            const newy = wheelBody.position.y;
 
             context.save();
 
@@ -340,13 +340,14 @@ function draw() {
             context.shadowOffsetY = 0;
 
             context.translate(newx, newy);
+            context.rotate(wheelBody.angle);
             context.rotate((sliceAngle - sliceAngle / 2.0) + sliceAngle * i);
             context.textBaseline = "middle";
             context.fillText(wheel.slices[i].text, radius * wheel.text.offsetFromCenter * 0.001, 0);
 
             context.restore();
         }
-
+/*
         // context.strokeStyle = 'rgb(50, 50, 150)';
 
         // for (let i = 0; i < slices.length; ++i) {
