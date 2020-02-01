@@ -63,7 +63,7 @@ const imageTcsLogo = new Image();
 const wheelData = {
     flashing: {
         color: '#ffff00',
-        time: 1234,
+        time: 200,
     },
     dividers: {
         color: '#8166ce',
@@ -291,53 +291,45 @@ function drawText() {
 }
 
 function drawTongue() {
-    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.translate(tongueBody.position.x, tongueBody.position.y);
+    context.rotate(tongueBody.angle);
 
-    if (tongueBody) {
-        context.translate(tongueBody.position.x * 1.07, tongueBody.position.y);
-        context.rotate(tongueBody.angle);
-    }
+    const scale = 0.9;
+    const w = 50;
+    const arrow = -60;
+    const wing = 50;
+    const start = 38;
+
     context.beginPath();
-    context.moveTo(-10, 0);
-    context.lineTo(0, -40);
-    context.lineTo(-90, 0);
-    context.lineTo(0, 40);
-    // context.lineTo(0, -30);
+    context.moveTo(start * scale, 0);
+    context.lineTo(wing * scale, -w * scale);
+    context.lineTo(arrow * scale, 0);
+    context.lineTo(wing, w * scale);
     context.closePath();
 
     context.shadowColor = 'black';
-    context.shadowBlur = 10;
+    context.shadowBlur = 20;
     context.shadowOffsetX = 0;
     context.shadowOffsetY = 0;
 
-    // the outline
-    context.lineWidth = 10;
-    // context.strokeStyle = 'rgba(0, 0, 200, 0.4)'; // 'lightblue';
+    context.lineWidth = 9;
     context.strokeStyle = 'lightblue';
     context.stroke();
 
     context.shadowColor = "transparent";
 
-    // the fill color
     context.fillStyle = 'rgba(222,222,222, 0.4)';
     context.fill();
 }
 
 function drawDebugCollisionCircles() {
     let radius = (canvas.height / 2) * 0.95;
-    const arr = [];
+    const arr = calcCollisionCircles();
 
-    for (let i = 0; i < wheelData.slices.length; ++i) {
-
-        const newPos = rotatePointCenter(radius, 0, rad2deg(wheelBody.angle) + 30 + i * 60);
-
-        arr.push(newPos);
-
-        newPos.x += wheelBody.position.x;
-        newPos.y += wheelBody.position.y;
+    for (let i = 0; i < arr.length; ++i) {
 
         context.beginPath();
-        context.arc(newPos.x, newPos.y, 170, 0, 2 * Math.PI);
+        context.arc(arr[i].x, arr[i].y, radius * 0.46, 0, 2 * Math.PI);
         context.stroke();
     }
 
@@ -367,7 +359,7 @@ function draw() {
 }
 
 function calcCollisionCircles() {
-    let radius = (canvas.height / 2) * 0.95;
+    let radius = (canvas.height / 2) * 0.91;
     const arr = [];
 
     for (let i = 0; i < wheelData.slices.length; ++i) {
@@ -428,16 +420,19 @@ function initPhysics() {
         }
     });
 
-    tongueBody = Bodies.rectangle(cw * 0.9, ch / 2, ch * 0.17, ch * 0.02);
+    // engine.world.gravity.y = 0;
+
+    tongueBody = Bodies.rectangle(cw * 0.9, ch / 2, ch * 0.1, ch * 0.04);
+    tongueBumperBody = Bodies.rectangle(cw, ch * 0.5, ch * 0.04, ch * 0.3, { isStatic: true });
 
     let x = cw / 2;
     let y = ch / 2;
-    let size = ch * 0.8;
-    let heig = size * 0.06;
+    let w = ch * 0.93;
+    let h = w * 0.024;
 
-    const divider1 = Bodies.rectangle(x, y, size, heig);
-    const divider2 = Bodies.rectangle(x, y, size, heig);
-    const divider3 = Bodies.rectangle(x, y, size, heig);
+    const divider1 = Bodies.rectangle(x, y, w, h);
+    const divider2 = Bodies.rectangle(x, y, w, h);
+    const divider3 = Bodies.rectangle(x, y, w, h);
 
     let degrees = 0;
     Body.setAngle(divider1, deg2rad(degrees));
@@ -449,8 +444,7 @@ function initPhysics() {
     Body.setAngle(divider3, deg2rad(degrees));
 
     wheelBody = Body.create({
-        parts: [divider1, divider2, divider3],
-        friction: 1
+        parts: [divider1, divider2, divider3]
     });
 
     const constraintWheel = Constraint.create({
@@ -460,9 +454,9 @@ function initPhysics() {
     })
 
     const constraintTongue = Constraint.create({
-        pointA: { x: cw * 0.9, y: ch * 0.5 },
+        pointA: { x: cw * 0.95, y: ch * 0.5 },
         bodyB: tongueBody,
-        pointB: { x: 30, y: 0 },
+        pointB: { x: 40, y: 0 },
         length: 0,
     });
 
@@ -470,12 +464,13 @@ function initPhysics() {
         pointA: { x: cw, y: ch * 0.5 },
         bodyB: tongueBody,
         pointB: { x: 50, y: 0 },
-        stiffness: 0.1,
+        stiffness: 0.18,
         length: 20
     })
 
     World.add(engine.world, [
         tongueBody,
+        tongueBumperBody,
         wheelBody,
         constraintTongue,
         constraintSpring,
