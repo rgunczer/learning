@@ -120,7 +120,7 @@
 
     const flashingTime = document.querySelector('#selected-slice-flash-time');
 
-    flashingTime.value = wheelData.flashing.color;
+    flashingTime.value = wheelData.flashing.time;
 
     flashingTime.addEventListener('change', (event) => {
 
@@ -219,5 +219,17 @@
             });
         }
     });
+
+    document.querySelector('#show-hide-editor')
+        .addEventListener('click', () => {
+            const editorElem = document.getElementById('editor');
+
+            if (editorElem.style.display === 'block') {
+                editorElem.style.display = 'none';
+            } else {
+                editorElem.style.display = 'block';
+            }
+        });
+
 
 })();
