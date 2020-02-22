@@ -1,0 +1,4 @@
+class BinaryTreeNode {
+    leftChild;
+    rightChild;
+}
