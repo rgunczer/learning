@@ -11,4 +11,4 @@ var foo = 'foo';
 }(foo));
 
 
-console.log(foo);
+console.log(foo); // test comment
