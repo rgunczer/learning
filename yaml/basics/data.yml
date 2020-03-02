@@ -1,0 +1,18 @@
+# example YAML file
+
+fruits:
+- apple
+- orange
+- melon
+
+cars:
+- porche: &id
+    year: 1900
+    weight: 200
+- ferrari:
+    year: 2000
+    weight: 100
+- lamborghini:
+    year: 1000
+    weight: 150
+- porche911: *id
